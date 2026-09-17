@@ -23,6 +23,8 @@ def load_data():
     df = pd.read_csv(DATA_URL)
     # 장르 처리: 세로막대 기호(|)로 구분된 경우 첫 번째 장르만 추출
     df["genre"] = df["genre"].fillna("미상").astype(str).str.split("|").str[0]
+    # 국가 미상 처리
+    df["nation"] = df["nation"].fillna("기타/미상")
     return df
 
 
@@ -215,6 +217,36 @@ st.plotly_chart(fig6, use_container_width=True)
 st.subheader("💡 이 그래프로 알 수 있는 것")
 st.info(
     "버블의 크기(첫 주 관객수)를 통해 초반 흥행 기세가 최종 관객수 및 초기 스크린 확보와 얼마나 밀접한 관계를 가지는지 한 번에 다차원적으로 비교할 수 있습니다."
+)
+
+st.divider()
+
+# ----------------------------------------------------
+# 7. 제작 국가 및 장르별 영화 편수 (선버스트 차트)
+# ----------------------------------------------------
+st.header("7. 제작 국가 및 장르별 영화 편수 계층 구조")
+
+# 국가 -> 장르 계층 구조에 따른 편수 집계 데이터 구성
+sunburst_df = (
+    data.groupby(["nation", "genre"]).size().reset_index(name="count")
+)
+
+fig7 = px.sunburst(
+    sunburst_df,
+    path=["nation", "genre"],
+    values="count",
+    title="제작 국가 → 장르별 영화 편수 선버스트",
+)
+
+fig7.update_traces(
+    hovertemplate="<b>%{label}</b><br>영화 수: %{value}편<extra></extra>"
+)
+
+st.plotly_chart(fig7, use_container_width=True)
+
+st.subheader("💡 이 그래프로 알 수 있는 것")
+st.info(
+    "어느 국가에서 제작된 영화가 국내 박스오피스 상위권에 가장 높은 비중을 차지하는지, 그리고 각 국가별로 주로 어떤 장르의 영화가 상위권에 진입했는지 계층적 비중을 쉽게 파악할 수 있습니다."
 )
 
 st.divider()
