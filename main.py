@@ -156,3 +156,39 @@ st.info(
 )
 
 st.divider()
+
+# ----------------------------------------------------
+# 5. 주요 장르별 총 관객수 분포 (상자 그림)
+# ----------------------------------------------------
+st.header("5. 주요 장르별 총 관객수 분포 비교")
+
+# 영화 편수가 10편 이상인 장르만 추출
+genre_counts_series = data["genre"].value_counts()
+major_genres = genre_counts_series[genre_counts_series >= 10].index
+filtered_data = data[data["genre"].isin(major_genres)]
+
+fig5 = px.box(
+    filtered_data,
+    x="genre",
+    y="total_audi",
+    color="genre",
+    hover_name="movieNm",
+    points="outliers",  # 이상치 점 표시
+    title="영화 10편 이상 주요 장르별 총 관객수 상자 그림",
+    labels={"genre": "장르", "total_audi": "총 관객수"},
+)
+
+fig5.update_traces(
+    hovertemplate="<b>%{hovertext}</b><br>총 관객수: %{y:,.0f}명<extra></extra>"
+)
+
+st.plotly_chart(fig5, use_container_width=True)
+
+# 그래프 해석 안내 구역
+st.subheader("💡 이 그래프로 알 수 있는 것")
+st.info(
+    "주요 장르별 관객수의 중앙값과 사분위 범위를 통해 장르별 전반적인 흥행 규모를 파악할 수 있으며, "
+    "상자 밖으로 크게 벗어난 점(이상치)을 통해 해당 장르 내에서 이례적인 대경신을 기록한 영화를 쉽게 구분할 수 있습니다."
+)
+
+st.divider()
