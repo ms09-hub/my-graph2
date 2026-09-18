@@ -25,8 +25,8 @@ def load_data():
     df["genre"] = df["genre"].fillna("미상").astype(str).str.split("|").str[0]
     # 국가 미상 처리
     df["nation"] = df["nation"].fillna("기타/미상")
-    # 개봉일(openDt) 날짜형 변환 (YYYYMMDD 8자리 숫자)
-    df["openDt_parsed"] = pd.to_datetime(
+    # 개봉일(openDt) 날짜 형식(datetime) 변환
+    df["openDt_dt"] = pd.to_datetime(
         df["openDt"].astype(str), format="%Y%m%d", errors="coerce"
     )
     return df
@@ -255,25 +255,22 @@ st.info(
 st.divider()
 
 # ----------------------------------------------------
-# 8. 개봉일과 총 관객수의 관계 (산점도)
+# 8. 개봉일 시점과 총 관객수의 관계 (산점도)
 # ----------------------------------------------------
 st.header("8. 개봉일과 총 관객수의 관계")
 
-# 그래프 설명 정보 출력
-st.markdown(
-    "**선택한 그래프**: **산점도(Scatter Plot)**  \n"
-    "**선택 이유**: 개봉일(시간)과 총 관객수(수량)라는 두 연속형 변수 간의 관계 및 추세를 개별 영화별로 직관적으로 확인하기에 최적입니다.  \n"
-    "**축 설정**: **가로축(X축)** = 개봉일 (`openDt`) | **세로축(Y축)** = 총 관객수 (`total_audi`)"
-)
-
 fig8 = px.scatter(
     data,
-    x="openDt_parsed",
+    x="openDt_dt",
     y="total_audi",
-    hover_name="movieNm",
     color="genre",
+    hover_name="movieNm",
     title="개봉일이 오래될수록 총 관객도 많아지는가",
-    labels={"openDt_parsed": "개봉일", "total_audi": "총 관객수", "genre": "장르"},
+    labels={
+        "openDt_dt": "개봉일",
+        "total_audi": "총 관객수",
+        "genre": "장르",
+    },
 )
 
 fig8.update_traces(
@@ -284,7 +281,7 @@ st.plotly_chart(fig8, use_container_width=True)
 
 st.subheader("💡 이 그래프로 알 수 있는 것")
 st.info(
-    "개봉 시점이 오래되었다고 해서 반드시 총 관객수가 더 많아지는 것은 아니며, 특정 계절이나 개봉 시즌(명절·방학 등) 또는 개별 영화의 흥행 여소가 관객수에 훨씬 더 결정적인 영향을 미침을 알 수 있습니다."
+    "개봉 시점이 오래되었다고 해서 총 관객수가 무조건 많은 것은 아니며, 특정 계절성(성수기)이나 개별 영화의 대형 흥행 여부가 관객수를 결정짓는 주된 요인임을 확인할 수 있습니다."
 )
 
 st.divider()
