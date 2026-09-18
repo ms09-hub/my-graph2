@@ -25,6 +25,10 @@ def load_data():
     df["genre"] = df["genre"].fillna("미상").astype(str).str.split("|").str[0]
     # 국가 미상 처리
     df["nation"] = df["nation"].fillna("기타/미상")
+    # 개봉일(openDt) 날짜형 변환 (YYYYMMDD 8자리 숫자)
+    df["openDt_parsed"] = pd.to_datetime(
+        df["openDt"].astype(str), format="%Y%m%d", errors="coerce"
+    )
     return df
 
 
@@ -251,42 +255,36 @@ st.info(
 st.divider()
 
 # ----------------------------------------------------
-# 8. 개봉일 상영 횟수가 많은 영화 총 관객도 많은가 (산점도)
+# 8. 개봉일과 총 관객수의 관계 (산점도)
 # ----------------------------------------------------
-st.header("8. 개봉일 상영 횟수가 많은 영화 총 관객도 많은가")
+st.header("8. 개봉일과 총 관객수의 관계")
 
-# 선택 이유 및 축 정보 안내 문구
+# 그래프 설명 정보 출력
 st.markdown(
-    """
-> **그래프 선택 이유**: 두 연속형 숫자 데이터(개봉일 상영 횟수와 총 관객수) 사이의 상관관계와 패턴을 확인하는 데 가장 적합한 시각화 방법이기 때문입니다.  
-> - **가로축(X축)**: `first_show` (개봉일 상영횟수)  
-> - **세로축(Y축)**: `total_audi` (총 관객수)
-"""
+    "**선택한 그래프**: **산점도(Scatter Plot)**  \n"
+    "**선택 이유**: 개봉일(시간)과 총 관객수(수량)라는 두 연속형 변수 간의 관계 및 추세를 개별 영화별로 직관적으로 확인하기에 최적입니다.  \n"
+    "**축 설정**: **가로축(X축)** = 개봉일 (`openDt`) | **세로축(Y축)** = 총 관객수 (`total_audi`)"
 )
 
 fig8 = px.scatter(
     data,
-    x="first_show",
+    x="openDt_parsed",
     y="total_audi",
-    color="genre",
     hover_name="movieNm",
-    title="개봉일 상영 횟수가 많은 영화 총 관객도 많은가",
-    labels={
-        "first_show": "개봉일 상영횟수",
-        "total_audi": "총 관객수",
-        "genre": "장르",
-    },
+    color="genre",
+    title="개봉일이 오래될수록 총 관객도 많아지는가",
+    labels={"openDt_parsed": "개봉일", "total_audi": "총 관객수", "genre": "장르"},
 )
 
 fig8.update_traces(
-    hovertemplate="<b>%{hovertext}</b><br>개봉일 상영횟수: %{x:,.0f}회<br>총 관객수: %{y:,.0f}명<extra></extra>"
+    hovertemplate="<b>%{hovertext}</b><br>개봉일: %{x|%Y-%m-%d}<br>총 관객수: %{y:,.0f}명<extra></extra>"
 )
 
 st.plotly_chart(fig8, use_container_width=True)
 
 st.subheader("💡 이 그래프로 알 수 있는 것")
 st.info(
-    "개봉일 상영 횟수와 총 관객수 사이에는 뚜렷한 양의 상관관계가 나타납니다. 즉, 초기 상영 횟수가 많은 영화일수록 최종 총 관객수가 높을 확률이 크지만, 초기 상영 횟수에 비해 상대적으로 총 관객수가 크게 늘어난 효율성이 높은 영화들도 함께 탐색해 볼 수 있습니다."
+    "개봉 시점이 오래되었다고 해서 반드시 총 관객수가 더 많아지는 것은 아니며, 특정 계절이나 개봉 시즌(명절·방학 등) 또는 개별 영화의 흥행 여소가 관객수에 훨씬 더 결정적인 영향을 미침을 알 수 있습니다."
 )
 
 st.divider()
