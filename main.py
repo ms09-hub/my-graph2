@@ -226,7 +226,6 @@ st.divider()
 # ----------------------------------------------------
 st.header("7. 제작 국가 및 장르별 영화 편수 계층 구조")
 
-# 국가 -> 장르 계층 구조에 따른 편수 집계 데이터 구성
 sunburst_df = (
     data.groupby(["nation", "genre"]).size().reset_index(name="count")
 )
@@ -247,6 +246,47 @@ st.plotly_chart(fig7, use_container_width=True)
 st.subheader("💡 이 그래프로 알 수 있는 것")
 st.info(
     "어느 국가에서 제작된 영화가 국내 박스오피스 상위권에 가장 높은 비중을 차지하는지, 그리고 각 국가별로 주로 어떤 장르의 영화가 상위권에 진입했는지 계층적 비중을 쉽게 파악할 수 있습니다."
+)
+
+st.divider()
+
+# ----------------------------------------------------
+# 8. 개봉일 상영 횟수가 많은 영화 총 관객도 많은가 (산점도)
+# ----------------------------------------------------
+st.header("8. 개봉일 상영 횟수가 많은 영화 총 관객도 많은가")
+
+# 선택 이유 및 축 정보 안내 문구
+st.markdown(
+    """
+> **그래프 선택 이유**: 두 연속형 숫자 데이터(개봉일 상영 횟수와 총 관객수) 사이의 상관관계와 패턴을 확인하는 데 가장 적합한 시각화 방법이기 때문입니다.  
+> - **가로축(X축)**: `first_show` (개봉일 상영횟수)  
+> - **세로축(Y축)**: `total_audi` (총 관객수)
+"""
+)
+
+fig8 = px.scatter(
+    data,
+    x="first_show",
+    y="total_audi",
+    color="genre",
+    hover_name="movieNm",
+    title="개봉일 상영 횟수가 많은 영화 총 관객도 많은가",
+    labels={
+        "first_show": "개봉일 상영횟수",
+        "total_audi": "총 관객수",
+        "genre": "장르",
+    },
+)
+
+fig8.update_traces(
+    hovertemplate="<b>%{hovertext}</b><br>개봉일 상영횟수: %{x:,.0f}회<br>총 관객수: %{y:,.0f}명<extra></extra>"
+)
+
+st.plotly_chart(fig8, use_container_width=True)
+
+st.subheader("💡 이 그래프로 알 수 있는 것")
+st.info(
+    "개봉일 상영 횟수와 총 관객수 사이에는 뚜렷한 양의 상관관계가 나타납니다. 즉, 초기 상영 횟수가 많은 영화일수록 최종 총 관객수가 높을 확률이 크지만, 초기 상영 횟수에 비해 상대적으로 총 관객수가 크게 늘어난 효율성이 높은 영화들도 함께 탐색해 볼 수 있습니다."
 )
 
 st.divider()
